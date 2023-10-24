@@ -1,2 +1,2 @@
 # GameOfCricket
-practice project about game of cricket game.
+practice project about game of cricket.
