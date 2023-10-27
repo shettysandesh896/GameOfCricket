@@ -8,7 +8,5 @@ public class GameOfCricketApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(GameOfCricketApplication.class, args);
-		System.out.print("Sahshagsh");
 	}
-
 }
