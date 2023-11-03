@@ -1,15 +1,15 @@
-package com.tekion.GameOfCricket.entity;
+package com.tekion.GameOfCricket.input;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class Team {
-	
-	private String teamId;
-	private String teamName;
+public class UserTeamInput {
+
+	private Team teamOne;
+	private Team teamTwo;
 
 }

@@ -5,9 +5,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.tekion.GameOfCricket.entity.Team;
 import com.tekion.GameOfCricket.exception.TeamExistsAlreadyException;
 import com.tekion.GameOfCricket.exception.TeamNotFoundException;
+import com.tekion.GameOfCricket.input.Team;
+import com.tekion.GameOfCricket.input.UserTeamInput;
 import com.tekion.GameOfCricket.service.TeamService;
 
 @Service
@@ -16,13 +17,19 @@ public class TeamServiceImpl implements TeamService {
 	private List<Team> teams = new ArrayList<Team>();
 
 	@Override
-	public Team addTeam(Team team) {
+	public List<Team> addTeam(UserTeamInput userTeamInput) {
 
-		if (teams.contains(team)) {
-			throw new TeamExistsAlreadyException("Enter a different team! entered team already exists.");
+		Team teamOne = userTeamInput.getTeamOne();
+		Team teamTwo = userTeamInput.getTeamTwo();
+		for (int i = 0; i < teams.size(); i++) {
+			if (teams.get(i).getTeamId().equals(teamOne.getTeamId())
+					|| teams.get(i).getTeamId().equals(teamTwo.getTeamId())) {
+				throw new TeamExistsAlreadyException("Enter a different team! entered team already exists.");
+			}
 		}
-		teams.add(team);
-		return team;
+		teams.add(teamOne);
+		teams.add(teamTwo);
+		return teams;
 	}
 
 	@Override

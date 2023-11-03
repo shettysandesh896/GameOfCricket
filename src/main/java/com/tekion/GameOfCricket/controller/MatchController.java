@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tekion.GameOfCricket.entity.Match;
+import com.tekion.GameOfCricket.response.MatchResult;
 import com.tekion.GameOfCricket.service.MatchService;
 
 @RestController
@@ -23,7 +23,7 @@ public class MatchController {
 	}
 
 	@PostMapping(value = "/play")
-	public ResponseEntity<Match> playMatch(@RequestParam String teamOneId, @RequestParam String teamTwoId,
+	public ResponseEntity<MatchResult> playMatch(@RequestParam String teamOneId, @RequestParam String teamTwoId,
 			@RequestParam int Over) {
 
 		return new ResponseEntity<>(matchService.playCricket(teamOneId, teamTwoId, Over), HttpStatus.OK);

@@ -10,7 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tekion.GameOfCricket.entity.Team;
+import com.tekion.GameOfCricket.input.Team;
+import com.tekion.GameOfCricket.input.UserTeamInput;
 import com.tekion.GameOfCricket.service.TeamService;
 
 @RestController
@@ -25,15 +26,15 @@ public class TeamController {
 	}
 
 	@PostMapping("/add/Team")
-	public Team insertTeam(@RequestBody Team team) {
-		return teamService.addTeam(team);
+	public List<Team> insertTeam(@RequestBody UserTeamInput userTeamInput) {
+		return teamService.addTeam(userTeamInput);
 	}
 
 	@GetMapping("/get/AllTeams")
 	public List<Team> getAllTeams() {
 		return teamService.getAllTeams();
 	}
-	
+
 	@GetMapping("/get/Team/{id}")
 	public Team getTeamById(@PathVariable String id) {
 		return teamService.getTeamById(id);

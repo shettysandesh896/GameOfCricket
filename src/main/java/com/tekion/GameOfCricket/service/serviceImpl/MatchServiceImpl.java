@@ -1,10 +1,20 @@
 package com.tekion.GameOfCricket.service.serviceImpl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.tekion.GameOfCricket.entity.Match;
-import com.tekion.GameOfCricket.entity.Team;
+import com.tekion.GameOfCricket.entity.Player;
+import com.tekion.GameOfCricket.input.Team;
+import com.tekion.GameOfCricket.model.TeamScoreboard;
+import com.tekion.GameOfCricket.model.TeamScoreboardOne;
+import com.tekion.GameOfCricket.model.TeamScoreboardTwo;
+import com.tekion.GameOfCricket.response.MatchResult;
 import com.tekion.GameOfCricket.service.MatchService;
 import com.tekion.GameOfCricket.service.TeamService;
 
@@ -13,76 +23,143 @@ public class MatchServiceImpl implements MatchService {
 
 	@Autowired
 	TeamService teamService;
+	@Autowired
+	TeamScoreboardOne teamOneResponse;
+	@Autowired
+	TeamScoreboardTwo teamTwoResponse;
+	@Autowired
+	MatchResult matchResult;
 
 	@Override
-	public Match playCricket(String teamOneId, String teamTwoId, int over) {
+	public MatchResult playCricket(String teamOneId, String teamTwoId, int over) {
 
 		Team teamOne = teamService.getTeamById(teamOneId);
 		Team teamTwo = teamService.getTeamById(teamTwoId);
 
-		Match match = new Match();
-		match.setMatchName(teamOne.getTeamName() + " vs " + teamTwo.getTeamName());
-		match.setTeamOne(teamOne.getTeamName());
-		match.setTeamTwo(teamTwo.getTeamName());
+//		Match match = new Match();
+//		match.setMatchName(teamOne.getTeamName() + " vs " + teamTwo.getTeamName());
+//		match.setTeamOne(teamOne.getTeamName());
+//		match.setTeamTwo(teamTwo.getTeamName());
 
-		int ballsPerInnings = over * 6;
+		// Defining each player as Batsman or Bowler...
+		Map<String, String> definedRoleTeamOne = teamSquad(teamOne.getBatsmen(), teamOne.getBowlers());
+		Map<String, String> definedRoleTeamTwo = teamSquad(teamTwo.getBatsmen(), teamTwo.getBowlers());
+		// Batting eleven list of each team
+		List<String> batterListTeamOne = playingElevenList(teamOne.getBatsmen(), teamOne.getBowlers());
+		List<String> batterListTeamTwo = playingElevenList(teamTwo.getBatsmen(), teamTwo.getBowlers());
 
-		// calling letsPlay with teamOne as Batting team.
-		int[] teamOneScore = letsPlay(match, teamOne, teamTwo, ballsPerInnings);
-		// calling letsPlay with teamTwo as Batting team.
-		int[] teamTwoScore = letsPlay(match, teamTwo, teamOne, ballsPerInnings);
+		// int ballsPerInnings = over * 6;
 
-		int teamOneRuns = teamOneScore[0];
-		int teamOneWickets = teamOneScore[1];
-		int teamTwoRuns = teamTwoScore[0];
-		int teamTwoWickets = teamTwoScore[1];
+		// Assigning team one to bat first and team two to bowl first...
+		String firstBatting = teamOne.getTeamName();
+		String secondBatting = teamTwo.getTeamName();
 
-		match.setTeamOneScoredRuns(teamOneRuns);
-		match.setTeamOneWickets(teamOneWickets);
-		match.setTeamTwoScoredRuns(teamTwoRuns);
-		match.setTeamTwoWickets(teamTwoWickets);
+		// Result of teamOneBatting
+		TeamScoreboardOne teamOneResult = (TeamScoreboardOne) letsPlay(teamOneId, definedRoleTeamOne, batterListTeamOne,
+				teamOneResponse, firstBatting, over);
+		// Result of teamTwoBatting
+		TeamScoreboardTwo teamTwoResult = (TeamScoreboardTwo) letsPlay(teamTwoId, definedRoleTeamTwo, batterListTeamTwo,
+				teamTwoResponse, secondBatting, over);
 
-		String outcome = null;
+		matchResult.setTeamOne(teamOneResult);
+		matchResult.setTeamTwo(teamTwoResult);
+		matchResult.setWinner(matchResult.winner());
 
-		if (teamOneRuns > teamTwoRuns) {
-			outcome = teamOne.getTeamName();
-			match.setMatchOutcome(outcome + " won");
-		} else if (teamTwoRuns > teamOneRuns) {
-			outcome = teamTwo.getTeamName();
-			match.setMatchOutcome(outcome + " won");
+		return matchResult;
 
-		} else {
-			outcome = "It's a draw!";
-			match.setMatchOutcome(outcome);
-
-		}
-		return match;
 	}
 
-	private int[] letsPlay(Match match, Team teamBatting, Team teamBowling, int ballsPerInnings) {
+	private TeamScoreboard letsPlay(String teamId, Map<String, String> definedRole, List<String> batterList,
+			TeamScoreboard teamScoreboard, String teamName, int over) {
 
 		int totalScore = 0;
 		int wicketCount = 0;
-		int maxWickets = 11;
+		int maxWickets = 10;
+		int overs = 0;
+		int balls = 0;
+		int playerBattingOrder = 0;
 
-		int[] teamScore = new int[10];
+		// Storing each player data...
+		List<Player> playerDataList = new LinkedList<>();
 
-		for (int ball = 1; ball <= ballsPerInnings; ball++) {
-			if (wicketCount == maxWickets) {
-				break;
+		// To check whether the team is all out...
+		boolean gotAllOut = false;
+
+		// getting details of first player to Bat..
+		String playerName = batterList.get(playerBattingOrder);
+		String playerType = definedRole.get(playerName);
+		int playerRuns = 0;
+
+		// Outer loop for number of overs..
+		// Inner loop for six balls for each over...
+		Outerloop: for (int i = 1; i <= over; i++) {
+			for (int j = 1; j <= 6; j++) {
+				balls++;
+				// break if team is all out...
+				if (wicketCount == maxWickets) {
+					gotAllOut = true;
+					break Outerloop;
+				}
+				int perBallScore = (int) (Math.random() * 8);
+
+				// when result of ball is 7(i.e Wicket)...
+				if (perBallScore == 7) {
+					playerDataList.add(new Player(playerName, playerType, playerRuns));
+					wicketCount++;
+					playerBattingOrder++;
+					if (playerBattingOrder <= 9) {
+						playerName = batterList.get(playerBattingOrder);
+						playerType = definedRole.get(playerName);
+						playerRuns = 0;
+					}
+				} else {
+					playerRuns += perBallScore;
+					totalScore += perBallScore;
+				}
 			}
-
-			int perBallScore = (int) (Math.random() * 8);
-			if (perBallScore == 7) {
-				wicketCount++;
-
-			} else {
-				totalScore += perBallScore;
-			}
+			// increase overs after 6 ball
+			balls = 0;
+			overs++;
 		}
-		teamScore[0] = totalScore;
-		teamScore[1] = wicketCount;
-		return teamScore;
+		// increase overs if ball bowled is 6 in case of team all out...
+		if (balls == 6) {
+			overs++;
+			balls = 0;
+		}
+
+		// for adding the runs of last playing batsmen if the team is not all out
+		if (!gotAllOut) {
+			playerDataList.add(new Player(playerName, playerType, playerRuns));
+		}
+
+		String total_overs = overs + "." + balls;
+
+		// Setting the team ScoreBoard
+		teamScoreboard.setTeamId(teamId);
+		teamScoreboard.setTeamName(teamName);
+		teamScoreboard.setRunsScored(totalScore);
+		teamScoreboard.setOvers(total_overs);
+		teamScoreboard.setWickets(wicketCount);
+		teamScoreboard.setScoreCard(playerDataList);
+
+		return teamScoreboard;
 	}
 
+	// Method to define each player as batsmen or bowler
+	public Map<String, String> teamSquad(ArrayList<String> batsmen, ArrayList<String> bowlers) {
+		Map<String, String> teamLineUp = new HashMap<>();
+		for (String player : batsmen)
+			teamLineUp.put(player, "BatsMen");
+		for (String player : bowlers)
+			teamLineUp.put(player, "Bowler");
+		return teamLineUp;
+	}
+
+	// Playing xi list to bat
+	public List<String> playingElevenList(ArrayList<String> batsmen, ArrayList<String> bowlers) {
+		List<String> team = new ArrayList<>();
+		team.addAll(batsmen);
+		team.addAll(bowlers);
+		return team;
+	}
 }
