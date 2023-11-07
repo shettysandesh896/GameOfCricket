@@ -14,9 +14,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Component
 public class MatchResult {
-	TeamScoreboardOne teamOne;
-	TeamScoreboardTwo teamTwo;
-	String winner;
+	private TeamScoreboardOne teamOne;
+	private TeamScoreboardTwo teamTwo;
+	private String winner;
 
 	public String winner() {
 		if (teamOne.getRunsScored() > teamTwo.getRunsScored()) {

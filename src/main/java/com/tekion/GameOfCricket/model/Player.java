@@ -1,4 +1,4 @@
-package com.tekion.GameOfCricket.entity;
+package com.tekion.GameOfCricket.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class Player {
-	String playerName;
-	String playerType;
-	int runsScored;
+	private String playerName;
+	private String playerRole;
+	private int runsScored;
+	private String teamName;
 }

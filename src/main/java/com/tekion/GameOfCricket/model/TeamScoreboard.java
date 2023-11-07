@@ -2,8 +2,6 @@ package com.tekion.GameOfCricket.model;
 
 import java.util.List;
 
-import com.tekion.GameOfCricket.entity.Player;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,10 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public abstract class TeamScoreboard {
-	String teamId;
-	String teamName;
-	int runsScored;
-	String overs;
-	int wickets;
-	List<Player> scoreCard;
+	private String teamId;
+	private String teamName;
+	private int runsScored;
+	private String overs;
+	private int wickets;
+	private List<Player> scoreCard;
 }

@@ -9,11 +9,15 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.tekion.GameOfCricket.entity.Player;
+import com.tekion.GameOfCricket.entity.PlayerStatistics;
+import com.tekion.GameOfCricket.entity.Scorecard;
 import com.tekion.GameOfCricket.input.Team;
+import com.tekion.GameOfCricket.model.Player;
 import com.tekion.GameOfCricket.model.TeamScoreboard;
 import com.tekion.GameOfCricket.model.TeamScoreboardOne;
 import com.tekion.GameOfCricket.model.TeamScoreboardTwo;
+import com.tekion.GameOfCricket.repository.PlayerRepo;
+import com.tekion.GameOfCricket.repository.ScorecardRepo;
 import com.tekion.GameOfCricket.response.MatchResult;
 import com.tekion.GameOfCricket.service.MatchService;
 import com.tekion.GameOfCricket.service.TeamService;
@@ -29,6 +33,14 @@ public class MatchServiceImpl implements MatchService {
 	TeamScoreboardTwo teamTwoResponse;
 	@Autowired
 	MatchResult matchResult;
+	@Autowired
+	Scorecard scoreCard;
+	@Autowired
+	PlayerStatistics playerStatistics;
+	@Autowired
+	ScorecardRepo scorecardRepo;
+	@Autowired
+	PlayerRepo playerRepo;
 
 	@Override
 	public MatchResult playCricket(String teamOneId, String teamTwoId, int over) {
@@ -65,6 +77,20 @@ public class MatchServiceImpl implements MatchService {
 		matchResult.setTeamTwo(teamTwoResult);
 		matchResult.setWinner(matchResult.winner());
 
+		// Setting scorecard of the match to save
+		scoreCard.setMatchResult(matchResult);
+
+		// Statistics of all players
+		List<Player> temp = new LinkedList<>();
+		temp.addAll(matchResult.getTeamOne().getScoreCard());
+		temp.addAll(matchResult.getTeamTwo().getScoreCard());
+
+		playerStatistics.setAllPlayerList(temp);
+
+		// Saving player statistics and Scorecard in MongoDB
+		playerRepo.save(playerStatistics);
+		scorecardRepo.save(scoreCard);
+
 		return matchResult;
 
 	}
@@ -87,7 +113,7 @@ public class MatchServiceImpl implements MatchService {
 
 		// getting details of first player to Bat..
 		String playerName = batterList.get(playerBattingOrder);
-		String playerType = definedRole.get(playerName);
+		String playerRole = definedRole.get(playerName);
 		int playerRuns = 0;
 
 		// Outer loop for number of overs..
@@ -104,12 +130,12 @@ public class MatchServiceImpl implements MatchService {
 
 				// when result of ball is 7(i.e Wicket)...
 				if (perBallScore == 7) {
-					playerDataList.add(new Player(playerName, playerType, playerRuns));
+					playerDataList.add(new Player(playerName, playerRole, playerRuns, teamName));
 					wicketCount++;
 					playerBattingOrder++;
 					if (playerBattingOrder <= 9) {
 						playerName = batterList.get(playerBattingOrder);
-						playerType = definedRole.get(playerName);
+						playerRole = definedRole.get(playerName);
 						playerRuns = 0;
 					}
 				} else {
@@ -129,7 +155,7 @@ public class MatchServiceImpl implements MatchService {
 
 		// for adding the runs of last playing batsmen if the team is not all out
 		if (!gotAllOut) {
-			playerDataList.add(new Player(playerName, playerType, playerRuns));
+			playerDataList.add(new Player(playerName, playerRole, playerRuns, teamName));
 		}
 
 		String total_overs = overs + "." + balls;

@@ -1,4 +1,4 @@
-package com.tekion.GameOfCricket.entity;
+package com.tekion.GameOfCricket.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
