@@ -19,6 +19,6 @@ import lombok.NoArgsConstructor;
 @Component
 public class PlayerStatistics {
 	@Id
-	private String id;
+	private String matchNumber;
 	private List<Player> allPlayerList;
 }

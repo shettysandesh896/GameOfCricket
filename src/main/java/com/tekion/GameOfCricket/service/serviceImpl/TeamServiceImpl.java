@@ -43,19 +43,18 @@ public class TeamServiceImpl implements TeamService {
 
 	@Override
 	public Team getTeamById(String id) {
-
-//		List<Team> team = teams.stream().filter(t -> t.getTeamId().equals(id)).collect(Collectors.toList());
-//
-//        if(!team.isEmpty())
-//        {
-//        	return team.get(0);
-//        }
-//        else {
-//        	throw new TeamNotFoundException("Oh No! Your team is not added.");
-//        }
-
 		return teams.stream().filter(t -> t.getTeamId().equals(id)).findFirst()
 				.orElseThrow(() -> new TeamNotFoundException("Oh No! Your team is not added."));
+	}
+
+	@Override
+	public Team deleteTeamById(String id) {
+		// teams.removeIf(t -> t.getTeamId().equals(id));
+		Team team = teams.stream().filter(t -> t.getTeamId().equals(id)).findFirst().orElseThrow(
+				() -> new TeamNotFoundException("Could not find the team with given id! Please check added teams"));
+		boolean teamRemovedFlag = teams.remove(team);
+		System.out.println(teamRemovedFlag);
+		return team;
 	}
 
 }

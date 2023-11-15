@@ -16,4 +16,6 @@ public interface TeamService {
 
 	public Team getTeamById(String id);
 
+	public Team deleteTeamById(String id);
+
 }

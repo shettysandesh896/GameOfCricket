@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ public class MatchServiceImpl implements MatchService {
 	PlayerRepo playerRepo;
 
 	@Override
-	public MatchResult playCricket(String teamOneId, String teamTwoId, int over) {
+	public MatchResult playCricket(String matchNumber, String teamOneId, String teamTwoId, int over) {
 
 		Team teamOne = teamService.getTeamById(teamOneId);
 		Team teamTwo = teamService.getTeamById(teamTwoId);
@@ -73,11 +74,13 @@ public class MatchServiceImpl implements MatchService {
 		TeamScoreboardTwo teamTwoResult = (TeamScoreboardTwo) letsPlay(teamTwoId, definedRoleTeamTwo, batterListTeamTwo,
 				teamTwoResponse, secondBatting, over);
 
+		// matchResult.setMatchNumber(matchNumber);
 		matchResult.setTeamOne(teamOneResult);
 		matchResult.setTeamTwo(teamTwoResult);
 		matchResult.setWinner(matchResult.winner());
 
 		// Setting scorecard of the match to save
+		scoreCard.setMatchNumber(matchNumber);
 		scoreCard.setMatchResult(matchResult);
 
 		// Statistics of all players
@@ -85,6 +88,7 @@ public class MatchServiceImpl implements MatchService {
 		temp.addAll(matchResult.getTeamOne().getScoreCard());
 		temp.addAll(matchResult.getTeamTwo().getScoreCard());
 
+		playerStatistics.setMatchNumber(matchNumber);
 		playerStatistics.setAllPlayerList(temp);
 
 		// Saving player statistics and Scorecard in MongoDB
@@ -187,5 +191,22 @@ public class MatchServiceImpl implements MatchService {
 		team.addAll(batsmen);
 		team.addAll(bowlers);
 		return team;
+	}
+
+	@Override
+	public Player getPlayerStats(String playerName, String matchNumber) {
+		PlayerStatistics playerStatsList = playerRepo.findById(matchNumber)
+				.orElseThrow(() -> new NoSuchElementException("Wrong Match! Enter a Correct Match Number...!"));
+		List<Player> playerList = playerStatsList.getAllPlayerList();
+		Player player = playerList.stream().filter(t -> t.getPlayerName().equals(playerName)).findFirst()
+				.orElseThrow(() -> new NoSuchElementException("Wrong Player! Player not found...!"));
+		return player;
+
+	}
+
+	@Override
+	public Scorecard getMatchResult(String matchNumber) {
+		return scorecardRepo.findById(matchNumber)
+				.orElseThrow(() -> new NoSuchElementException("Wrong Player! Player not found...!"));
 	}
 }

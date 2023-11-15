@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Component
 public class Scorecard {
 	@Id
-	private String id;
+	private String matchNumber;
 	private MatchResult matchResult;
 
 }
